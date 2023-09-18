@@ -1,0 +1,6 @@
+[nginx]
+ubuntu@3.226.125.216
+
+[nginx:vars]
+ansible_ssh_private_key_file=~/.ssh/chave
+remote_user = ubuntu

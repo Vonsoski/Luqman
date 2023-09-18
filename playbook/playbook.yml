@@ -1,0 +1,51 @@
+---
+- name: Criar user Dev
+  hosts: all
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Criar User Dev
+      ansible.builtin.user:
+        name: dev-teste
+        shell: /bin/bash
+        groups: sudo
+        append: yes
+        password: $6$ZHh18s9/ot1ZFOn5$FbmpfqUbcJTt1DmUZvPDDkhoVI7Prs9SFaQSQkVukhhS9uw22bx6/96.ilovff42T4hHoSrg95qGYBjs.mNQ7/
+
+    ##parte 2
+    - name: Criar o diretório .ssh
+      ansible.builtin.file:
+        path: /home/dev-teste/.ssh
+        owner: dev-teste
+        group: dev-teste
+        state: directory
+        recurse: yes
+
+    - name: Adicionar chave na instância
+      ansible.builtin.copy:
+        # Sua máquina local
+        src: ~/.ssh/chave.pub
+        # AWS
+        dest: /home/dev-teste/.ssh/authorized_keys
+
+- name: Instalação do nginx e configuração de página estática
+  hosts: all
+  remote_user: dev-teste
+  tasks:
+    - name: Copiar a página HTML
+      ansible.builtin.copy:
+        src: ./index.html
+        dest: /home/dev-teste/index.html
+
+    - name: Instalar o nginx
+      become: yes
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+    - name: Copiar o arquivo nginx.conf para o server
+      become: true
+      ansible.builtin.copy:
+        src: ./nginx.conf
+        dest: /etc/nginx/nginx.conf
+
